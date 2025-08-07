@@ -2,6 +2,12 @@
 
 A comprehensive llm-based resume extractor and web-based dashboard for screening and analyzing large amounts of candidate resumes (tested on thousands of resumes).
 
+## 📸 Dashboard Preview
+
+![Resume Screening Dashboard](images/dashboard-screenshot.png)
+
+*Interactive dashboard showing candidate analytics, filtering, and detailed candidate profiles with privacy controls.*
+
 ## ✨ Key Capabilities
 
 - **🤖 AI-Powered Extraction**: Convert unstructured resumes into structured candidate profiles using multiple LLM providers

@@ -66,3 +66,11 @@
 
 # Allow __init__.py files
 !__init__.py
+
+# Allow images directory and image files for documentation
+!images/
+!*.png
+!*.jpg
+!*.jpeg
+!*.gif
+!*.svg
