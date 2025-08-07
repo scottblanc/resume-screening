@@ -1,0 +1,68 @@
+# Ignore everything by default
+*
+
+# Allow Python files
+!*.py
+
+# Allow Markdown files
+!*.md
+
+# Allow requirements.txt
+!requirements.txt
+
+# Allow .gitignore itself
+!.gitignore
+
+# Exclude data files with sensitive information
+*.csv
+*.json
+*.pdf
+*.docx
+*.zip
+
+# Exclude resume directories
+*/
+
+# Allow HTML files (for dashboard)
+!*.html
+
+# Allow CSS files (if any)
+!*.css
+
+# Allow JavaScript files (if any)
+!*.js
+
+# Allow shell scripts
+!*.sh
+
+# Allow configuration files
+!*.config
+!*.conf
+!*.ini
+!*.yaml
+!*.yml
+
+# Allow documentation
+!*.txt
+!*.rst
+
+# Allow license files
+!LICENSE*
+!license*
+!LICENSE
+
+# Allow README files
+!README*
+!readme*
+
+# Allow setup files
+!setup.py
+!setup.cfg
+!pyproject.toml
+
+# Allow test files
+!test_*.py
+!*_test.py
+
+# Allow __init__.py files
+!__init__.py
