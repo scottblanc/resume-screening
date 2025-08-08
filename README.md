@@ -15,7 +15,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 - **🔍 Advanced Filtering**: AI-ranked search and multi-dimensional filtering
 - **🎯 Batch Processing**: Handle hundreds or thousands of resumes efficiently
 - **🔧 Fully Customizable**: Adapt extraction schema for any role or industry
-- **🔒 Privacy-First**: Built-in anonymization controls for unbiased screening
+- **🔒 Privacy Controls**: Built-in anonymization for demos and presentations
 
 ## 🚀 Quick Start
 
@@ -163,7 +163,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
   - Smart filtering preserves ranking while narrowing results
 - **Information-Dense Cards**: Three-line layout showing essential candidate data at a glance
 - **Direct Access**: One-click links to original resumes, GitHub profiles, and LinkedIn
-- **Privacy Controls**: Toggle to anonymize sensitive information for unbiased review
+- **Privacy Controls**: Toggle to anonymize sensitive information for demos and presentations
 
 ### 📋 Comprehensive Candidate Profiles
 - **Complete Overview**: All extracted data organized in intuitive sections
