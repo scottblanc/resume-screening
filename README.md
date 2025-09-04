@@ -1,23 +1,23 @@
-# 🎯 Resume Screening
+# Resume Screening
 
 A comprehensive llm-based resume extractor and web-based dashboard for screening and analyzing large amounts of candidate resumes (tested on thousands of resumes).
 
-## 📸 Dashboard Preview
+## Dashboard Preview
 
 ![Resume Screening Dashboard](images/dashboard-screenshot.png)
 
 *Interactive dashboard showing candidate analytics, filtering, and detailed candidate profiles with privacy controls.*
 
-## ✨ Key Capabilities
+## Key Capabilities
 
-- **🤖 AI-Powered Extraction**: Convert unstructured resumes into structured candidate profiles using multiple LLM providers
-- **📊 Intelligent Analytics**: Real-time insights with interactive charts and KPIs
-- **🔍 Advanced Filtering**: AI-ranked search and multi-dimensional filtering
-- **🎯 Batch Processing**: Handle hundreds or thousands of resumes efficiently
-- **🔧 Fully Customizable**: Adapt extraction schema for any role or industry
-- **🔒 Privacy Controls**: Built-in anonymization for demos and presentations
+- **AI-Powered Extraction**: Convert unstructured resumes into structured candidate profiles using multiple LLM providers
+- **Intelligent Analytics**: Interactive insights with charts and KPIs
+- **Advanced Filtering**: AI-ranked search and multi-dimensional filtering
+- **Batch Processing**: Handle hundreds or thousands of resumes efficiently
+- **Fully Customizable**: Adapt extraction schema for any role or industry
+- **Privacy Controls**: Built-in anonymization for demos and presentations
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.7+
@@ -35,7 +35,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
    
    The resume extractor supports multiple AI providers. Choose one and set up your API key:
 
-   **🚀 Groq (Recommended - Fast & Free)**
+   **Groq (Recommended - Fast & Free)**
    - Get free API key: https://console.groq.com/keys
    - Set environment variable:
      ```bash
@@ -43,7 +43,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
      ```
    - Model: `groq-llama-3.3-70b` (default)
    
-   **🧠 OpenAI**
+   **OpenAI**
    - Get API key: https://platform.openai.com/api-keys
    - Set environment variable:
      ```bash
@@ -51,7 +51,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
      ```
    - Model: `gpt-4`
    
-   **🤖 Anthropic Claude**
+   **Anthropic Claude**
    - Get API key: https://console.anthropic.com/account/keys
    - Set environment variable:
      ```bash
@@ -59,7 +59,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
      ```
    - Model: `claude-3-haiku`
    
-   **🔍 Google Gemini**
+   **Google Gemini**
    - Get API key: https://makersuite.google.com/app/apikey
    - Set environment variable:
      ```bash
@@ -67,7 +67,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
      ```
    - Model: `gemini-2.0-flash`
 
-   💡 **Tip**: Add the export command to your `~/.bashrc` or `~/.zshrc` to make it permanent.
+   **Tip**: Add the export command to your `~/.bashrc` or `~/.zshrc` to make it permanent.
 
 3. **Extract candidate data from resumes**:
    
@@ -130,14 +130,14 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
    http://localhost:8003/recruiting_dashboard.html?csv=applicants_2024.csv
    ```
    
-   💡 **Important**: When using a custom CSV file, always include the `?csv=filename.csv` parameter in the URL, otherwise the dashboard will load the default `candidates.csv` file.
+   **Important**: When using a custom CSV file, always include the `?csv=filename.csv` parameter in the URL, otherwise the dashboard will load the default `candidates.csv` file.
 
 5. **Stop the server** when done:
    - Press `Ctrl+C` in the terminal
 
-## 📋 Core Features
+## Core Features
 
-### 🤖 AI-Powered Resume Extraction
+### AI-Powered Resume Extraction
 - **Multi-LLM Support**: Works with Groq, OpenAI, Anthropic, and Google AI models
 - **Structured Data Extraction**: Converts unstructured resumes into standardized candidate profiles
 - **Comprehensive Analysis**: Extracts 40+ data points including skills, experience, education, and accomplishments
@@ -146,8 +146,8 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 - **PDF Support**: Robust PDF text extraction with multiple fallback methods
 - **Customizable Schema**: Easily modify extraction fields for different roles and industries
 
-### 📊 Interactive Analytics Dashboard
-- **Real-time Insights**: Instantly visualize extracted candidate data
+### Interactive Analytics Dashboard
+- **Interactive Insights**: Instantly visualize extracted candidate data
 - **KPIs**: Total # candidates, average scores, # from top-tier universities, experience distribution
 - **Interactive Charts**:
   - Candidates by University (top 70, tier-sorted with color coding)
@@ -155,7 +155,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
   - Overall Score Distribution for quality assessment
   - Job Level Distribution for role matching
 
-### 👥 Advanced Candidate Management
+### Advanced Candidate Management
 - **AI-Ranked Results**: Candidates automatically sorted by overall AI-generated score
 - **Intelligent Search & Filtering**: 
   - Real-time search across names, emails, universities, and skills
@@ -165,7 +165,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 - **Direct Access**: One-click links to original resumes, GitHub profiles, and LinkedIn
 - **Privacy Controls**: Toggle to anonymize sensitive information for demos and presentations
 
-### 📋 Comprehensive Candidate Profiles
+### Comprehensive Candidate Profiles
 - **Complete Overview**: All extracted data organized in intuitive sections
 - **Education Analysis**: Degrees, universities with tier rankings, GPAs, and academic strength
 - **Experience Assessment**: Career progression, companies worked, programming/AI experience years
@@ -173,7 +173,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 - **AI-Generated Scores**: Six aggregate scores comparing candidates relative to their experience level
 - **Achievement Highlights**: Top 3 accomplishments extracted and ranked by AI
 
-## 🛠️ Technical Implementation
+## Technical Implementation
 
 ### Technology Stack
 - **Frontend**: Pure HTML/CSS/JavaScript (no frameworks required)
@@ -195,7 +195,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 - **Data Validation**: Handles missing or invalid data gracefully
 - **Resume Linking**: Automatic discovery and linking of resume files
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 resume-screening/
@@ -211,7 +211,7 @@ resume-screening/
 └── [resume_directories]/       # Resume files (PDF)
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 ### Resume Extractor Options
 
@@ -261,7 +261,7 @@ python serve_dashboard.py --port 8080
 python serve_dashboard.py applicants.csv --resume-dirs resumes_2024 --port 9000
 ```
 
-## 🔧 Data Schema
+## Data Schema
 
 The dashboard expects a CSV file with the following columns (as generated by `resume_extractor.py`):
 
@@ -319,7 +319,7 @@ The dashboard expects a CSV file with the following columns (as generated by `re
 
 To customize fields, modify the `ResumeData` class in `resume_extractor.py`. The dashboard will automatically adapt to display any fields present in your CSV data.
 
-## 🧪 Testing
+## Testing
 
 Test your setup with the included test script:
 
@@ -331,7 +331,7 @@ python test_dashboard.py
 python test_dashboard.py my_data.csv
 ```
 
-## 🔄 Data Updates
+## Data Updates
 
 To update the candidate data:
 
@@ -341,7 +341,7 @@ To update the candidate data:
 
 The server automatically scans for resume files and updates paths on each startup.
 
-## 🎨 Customization
+## Customization
 
 The system can be customized at multiple levels:
 
@@ -358,7 +358,7 @@ The system can be customized at multiple levels:
 - **Columns**: Adjust which data is displayed in the candidate list
 - **Scoring Display**: Update which scores are shown in the candidate cards
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -386,7 +386,7 @@ The system can be customized at multiple levels:
 - Safari
 - Edge
 
-## 🤝 Contributing
+## Contributing
 
 To contribute to the dashboard:
 
@@ -396,20 +396,20 @@ To contribute to the dashboard:
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ### MIT License Summary
-- ✅ **Commercial use** - Use this software commercially
-- ✅ **Modification** - Modify and customize the code
-- ✅ **Distribution** - Distribute copies of the software
-- ✅ **Private use** - Use the software privately
-- ⚠️ **No warranty** - Software is provided "as is"
-- ⚠️ **License notice** - Include license and copyright notice in copies
+- **Commercial use** - Use this software commercially
+- **Modification** - Modify and customize the code
+- **Distribution** - Distribute copies of the software
+- **Private use** - Use the software privately
+- **No warranty** - Software is provided "as is"
+- **License notice** - Include license and copyright notice in copies
 
 The MIT License is one of the most permissive open source licenses, allowing you to use this software for any purpose with minimal restrictions.
 
 ---
 
-**Happy Recruiting! 🎯**
+**Happy Recruiting!**
