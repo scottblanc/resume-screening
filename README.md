@@ -11,6 +11,7 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 ## Key Capabilities
 
 - **AI-Powered Extraction**: Convert unstructured resumes into structured candidate profiles using multiple LLM providers
+- **Parallel Processing**: Process multiple resumes simultaneously with configurable workers for faster extraction
 - **Intelligent Analytics**: Interactive insights with charts and KPIs
 - **Advanced Filtering**: AI-ranked search and multi-dimensional filtering
 - **Batch Processing**: Handle hundreds or thousands of resumes efficiently
@@ -27,8 +28,22 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 ### Installation & API Setup
 
 1. **Install dependencies**:
+   
+   **Using Virtual Environment (Recommended)**:
    ```bash
+   # Create and activate virtual environment
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Install requirements
    pip install -r requirements.txt
+   ```
+   
+   **Or Global Installation**:
+   ```bash
+   pip3 install -r requirements.txt
+   # Or if you have permission issues:
+   pip3 install --user -r requirements.txt
    ```
 
 2. **Choose and configure your AI model**:
@@ -95,8 +110,11 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
    # Pass API key directly (alternative to environment variable)
    python resume_extractor.py --model gpt-4 --api-key YOUR_API_KEY
    
+   # Use parallel processing for faster extraction (default: 4 workers)
+   python resume_extractor.py --directory batch1 --workers 8
+   
    # Combine options
-   python resume_extractor.py --directory batch1 --output batch1_results.csv --model groq-llama-3.3-70b --sample 50
+   python resume_extractor.py --directory batch1 --output batch1_results.csv --model groq-llama-3.3-70b --sample 50 --workers 6
    ```
    
    **Supported AI Models:**
@@ -139,12 +157,14 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
 
 ### AI-Powered Resume Extraction
 - **Multi-LLM Support**: Works with Groq, OpenAI, Anthropic, and Google AI models
+- **Parallel Processing**: Concurrent extraction with configurable workers (4-8x faster than sequential)
 - **Structured Data Extraction**: Converts unstructured resumes into standardized candidate profiles
 - **Comprehensive Analysis**: Extracts 40+ data points including skills, experience, education, and accomplishments
 - **Intelligent Scoring**: AI-generated aggregate scores (1-10) across 6 key dimensions relative to experience level
 - **Batch Processing**: Efficiently processes hundreds or thousands of resumes
 - **PDF Support**: Robust PDF text extraction with multiple fallback methods
 - **Customizable Schema**: Easily modify extraction fields for different roles and industries
+- **Resume Recovery**: Automatically resumes from interruptions, preserving already processed resumes
 
 ### Interactive Analytics Dashboard
 - **Interactive Insights**: Instantly visualize extracted candidate data
@@ -224,7 +244,14 @@ Options:
   --model MODEL         LLM model to use (default: groq-llama-3.3-70b)
   --api-key KEY         API key for the model provider
   --sample N           Process only N resumes (for testing)
+  --workers N          Number of parallel workers (default: 4, recommended: 4-8)
   -h, --help           Show help message
+
+Performance Notes:
+  - Default 4 workers provides good balance of speed and API rate limit compliance
+  - Use 6-8 workers for faster processing with providers that support higher rate limits
+  - Use 2 workers for conservative rate limit compliance
+  - Processing speed scales nearly linearly with worker count up to API rate limits
 ```
 
 ### Dashboard Server Options
