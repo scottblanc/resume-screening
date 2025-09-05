@@ -19,6 +19,8 @@ import logging
 import sys
 from typing import Dict, List, Optional, Type
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 import fitz  # PyMuPDF
 import PyPDF2
 from pydantic import BaseModel, Field
@@ -145,14 +147,20 @@ class ResumeData(BaseModel):
     accomplishment_3: str = Field(description="Third most impressive accomplishment")
 
 class ResumeLLMParser:
-    def __init__(self, model: str = "groq-llama-3.3-70b", api_key: Optional[str] = None):
+    def __init__(self, model: str = "groq-llama-3.3-70b", api_key: Optional[str] = None, max_workers: int = 4):
         """Initialize the LLM-based resume parser.
         
         Args:
             model: The model to use (groq-llama-3.3-70b, gpt-4, claude-3-haiku, gemini-2.0-flash)
             api_key: API key for the selected model provider
+            max_workers: Maximum number of concurrent threads (default: 4)
         """
         self.model = model
+        self.api_key = api_key
+        self.max_workers = max_workers
+        self.rate_limit_lock = threading.Lock()
+        self.last_request_time = 0
+        # Initialize a client for testing connection
         self.client = self._initialize_client(model, api_key)
         
     def _initialize_client(self, model: str, api_key: Optional[str] = None):
@@ -254,6 +262,19 @@ class ResumeLLMParser:
             except Exception as e2:
                 logging.error(f"Both PDF extraction methods failed for {pdf_path}: {e2}")
                 return ""
+    
+    def _get_client(self):
+        """Get a fresh client instance for thread-safe usage."""
+        return self._initialize_client(self.model, self.api_key)
+    
+    def _rate_limited_request(self, delay: float = 0.5):
+        """Ensure minimum delay between requests to respect rate limits."""
+        with self.rate_limit_lock:
+            now = time.time()
+            time_since_last = now - self.last_request_time
+            if time_since_last < delay:
+                time.sleep(delay - time_since_last)
+            self.last_request_time = time.time()
     
     def parse_resume_with_llm(self, resume_text: str, filename: str) -> Optional[ResumeData]:
         """Use LLM to parse and extract structured data from resume text."""
@@ -426,12 +447,18 @@ Please extract and evaluate:
 Be accurate and conservative in your estimates. If information is not clear, make reasonable inferences based on the context."""
 
         try:
+            # Rate limit API calls
+            self._rate_limited_request()
+            
+            # Get a thread-local client
+            client = self._get_client()
+            
             # Make the API call with retry logic
             for attempt in range(3):
                 try:
                     logging.info(f"Sending resume to LLM for parsing (attempt {attempt + 1}/3)")
                     
-                    response = self.client.chat.completions.create(
+                    response = client.chat.completions.create(
                         response_model=ResumeData,
                         messages=[{"role": "user", "content": prompt}],
                         max_retries=2  # Let instructor handle some retries too
@@ -515,6 +542,15 @@ Return clean JSON without any extra tags or text."""
         except Exception as e:
             logging.error(f"❌ Data conversion failed for {filename}: {str(e)[:100]}...")
             return None
+
+    def process_resume_parallel_safe(self, pdf_path: str) -> tuple[str, Optional[Dict], Optional[str]]:
+        """Thread-safe wrapper for process_resume that returns (path, result, error)."""
+        try:
+            result = self.process_resume(pdf_path)
+            return (pdf_path, result, None)
+        except Exception as e:
+            error_msg = f"Processing error: {str(e)[:100]}..."
+            return (pdf_path, None, error_msg)
     
     def process_all_resumes(self, directory: str, output_file: str = 'resume_analysis.csv', 
                            sample_size: Optional[int] = None):
@@ -589,66 +625,59 @@ Return clean JSON without any extra tags or text."""
             logging.info("No new resumes to process!")
             return
         
-        # Process each resume with progress bar
+        # Process resumes in parallel
         success_count = 0
         pbar = tqdm(
-            pdf_files_to_process, 
-            desc="📄 Processing resumes", 
-            unit="resume",
-            initial=0,
             total=len(pdf_files_to_process),
+            desc=f"📄 Processing resumes ({self.max_workers} workers)", 
+            unit="resume",
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}] {postfix}"
         )
         
         try:
-            for i, pdf_path in enumerate(pbar, 1):
-                filename = os.path.basename(pdf_path)
-                current_total = total_already_done + i
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                # Submit all jobs
+                future_to_path = {
+                    executor.submit(self.process_resume_parallel_safe, pdf_path): pdf_path 
+                    for pdf_path in pdf_files_to_process
+                }
                 
-                # Update progress bar description
-                pbar.set_postfix_str(f"Current: {filename[:30]}...")
-                
-                try:
-                    result = self.process_resume(pdf_path)
+                completed = 0
+                for future in as_completed(future_to_path):
+                    completed += 1
+                    pdf_path, result, error = future.result()
+                    filename = os.path.basename(pdf_path)
+                    
+                    # Update progress bar
+                    pbar.set_postfix_str(f"Latest: {filename[:25]}...")
+                    
                     if result:
                         results.append(result)
                         success_count += 1
                         pbar.set_description(f"📄 Processing resumes (✅ {success_count} successful)")
                     else:
-                        # Track failed resumes with more detail
+                        # Track failed resumes
+                        error_reason = error or 'LLM parsing failed - check resume format and content'
                         errors.append({
                             'resume_filename': filename,
                             'pdf_path': pdf_path,
                             'error_time': time.strftime('%Y-%m-%d %H:%M:%S'),
-                            'error_reason': 'LLM parsing failed - check resume format and content'
+                            'error_reason': error_reason
                         })
                         pbar.set_description(f"📄 Processing resumes (⚠️ {len(errors)} failed)")
-                        
-                except Exception as e:
-                    # More detailed error tracking
-                    error_reason = f"Processing error: {str(e)[:100]}..."
-                    errors.append({
-                        'resume_filename': filename,
-                        'pdf_path': pdf_path,
-                        'error_time': time.strftime('%Y-%m-%d %H:%M:%S'),
-                        'error_reason': error_reason
-                    })
-                    pbar.set_description(f"📄 Processing resumes (❌ {len(errors)} errors)")
-                
-                # Save intermediate results every 10 resumes
-                if i % 10 == 0:
-                    try:
-                        self._save_results(results, f"{output_file}.tmp")
-                        self._save_errors(errors, f"{output_file.replace('.csv', '_errors.csv')}")
-                        processed_count = len([r for r in results if isinstance(r, dict)])
-                        pbar.write(f"💾 Saved intermediate results ({processed_count} total processed)")
-                    except Exception as e:
-                        pbar.write(f"⚠️ Warning: Failed to save intermediate results: {e}")
-                
-                # Small delay to be nice to the API
-                if i < len(pdf_files_to_process):  # Don't delay after last resume
-                    time.sleep(1)
                     
+                    pbar.update(1)
+                    
+                    # Save intermediate results every 20 completed resumes
+                    if completed % 20 == 0:
+                        try:
+                            self._save_results(results, f"{output_file}.tmp")
+                            self._save_errors(errors, f"{output_file.replace('.csv', '_errors.csv')}")
+                            processed_count = len([r for r in results if isinstance(r, dict)])
+                            pbar.write(f"💾 Saved intermediate results ({processed_count} total processed)")
+                        except Exception as e:
+                            pbar.write(f"⚠️ Warning: Failed to save intermediate results: {e}")
+                            
         except KeyboardInterrupt:
             pbar.write(f"\n🛑 Processing interrupted by user. Saving progress...")
             pbar.close()
@@ -765,6 +794,7 @@ Examples:
   python resume_extractor.py                          # Process all PDFs in current directory
   python resume_extractor.py --sample 5               # Test with 5 resumes
   python resume_extractor.py --model gpt-4            # Use GPT-4 instead of Groq
+  python resume_extractor.py --workers 8              # Use 8 parallel workers (faster)
   python resume_extractor.py --directory /path/to/resumes --output results.csv
 
 Set API keys via environment variables:
@@ -781,20 +811,22 @@ Set API keys via environment variables:
     parser.add_argument('--output', default='candidates.csv', help='Output CSV filename (default: candidates.csv)')
     parser.add_argument('--sample', type=int, help='Process only N resumes for testing (default: all)')
     parser.add_argument('--directory', default='.', help='Directory to search for resumes (default: current)')
+    parser.add_argument('--workers', type=int, default=4, help='Number of parallel workers (default: 4, max recommended: 8)')
     
     args = parser.parse_args()
     
     print(f"🚀 Starting resume extraction with {args.model}")
     print(f"📂 Searching directory: {args.directory}")
     print(f"📄 Output file: {args.output}")
+    print(f"⚙️ Parallel workers: {args.workers}")
     if args.sample:
         print(f"🔬 Sample mode: processing only {args.sample} resumes")
     print()
     
     try:
         # Initialize parser
-        resume_parser = ResumeLLMParser(model=args.model, api_key=args.api_key)
-        print(f"✅ Successfully initialized {args.model} client")
+        resume_parser = ResumeLLMParser(model=args.model, api_key=args.api_key, max_workers=args.workers)
+        print(f"✅ Successfully initialized {args.model} client with {args.workers} workers")
         
         # Process resumes
         resume_parser.process_all_resumes(
