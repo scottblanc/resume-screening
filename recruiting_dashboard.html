@@ -1194,8 +1194,8 @@
                             <div class="candidate-scores-container">
                                 <div class="candidate-links">
                                     ${resumeLink}
-                                    ${candidate.github_link ? `<a href="${candidate.github_link}" target="_blank" class="candidate-link" onclick="event.stopPropagation()">GitHub</a>` : ''}
-                                    ${candidate.linkedin_link ? `<a href="${candidate.linkedin_link}" target="_blank" class="candidate-link" onclick="event.stopPropagation()">LinkedIn</a>` : ''}
+                                    ${candidate.github_link ? `<a href="${candidate.github_link.startsWith('http') ? candidate.github_link : 'https://' + candidate.github_link}" target="_blank" class="candidate-link" onclick="event.stopPropagation()">GitHub</a>` : ''}
+                                    ${candidate.linkedin_link ? `<a href="${candidate.linkedin_link.startsWith('http') ? candidate.linkedin_link : 'https://' + candidate.linkedin_link}" target="_blank" class="candidate-link" onclick="event.stopPropagation()">LinkedIn</a>` : ''}
                                 </div>
                                 <span class="candidate-score">${candidate.overall_score.toFixed(1)}</span>
                             </div>
@@ -1283,8 +1283,8 @@
                     </div>
                     <div class="detail-links">
                         ${resumeLink}
-                        ${c.github_link ? `<a href="${c.github_link}" target="_blank" class="detail-link">GitHub Profile</a>` : ''}
-                        ${c.linkedin_link ? `<a href="${c.linkedin_link}" target="_blank" class="detail-link">LinkedIn Profile</a>` : ''}
+                        ${c.github_link ? `<a href="${c.github_link.startsWith('http') ? c.github_link : 'https://' + c.github_link}" target="_blank" class="detail-link">GitHub Profile</a>` : ''}
+                        ${c.linkedin_link ? `<a href="${c.linkedin_link.startsWith('http') ? c.linkedin_link : 'https://' + c.linkedin_link}" target="_blank" class="detail-link">LinkedIn Profile</a>` : ''}
                     </div>
 
                 </div>
