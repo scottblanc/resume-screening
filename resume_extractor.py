@@ -147,25 +147,27 @@ class ResumeData(BaseModel):
     accomplishment_3: str = Field(description="Third most impressive accomplishment")
 
 class ResumeLLMParser:
-    def __init__(self, model: str = "groq-llama-3.3-70b", api_key: Optional[str] = None, max_workers: int = 4):
+    def __init__(self, provider: str = "groq", model: str = "llama-3.3-70b-versatile", api_key: Optional[str] = None, max_workers: int = 4):
         """Initialize the LLM-based resume parser.
         
         Args:
-            model: The model to use (groq-llama-3.3-70b, gpt-4, claude-3-haiku, gemini-2.0-flash)
+            provider: The model provider to use (groq, openai, anthropic, gemini)
+            model: The model to use. Works with any model supported by instructor for the chosen provider
             api_key: API key for the selected model provider
             max_workers: Maximum number of concurrent threads (default: 4)
         """
+        self.provider = provider
         self.model = model
         self.api_key = api_key
         self.max_workers = max_workers
         self.rate_limit_lock = threading.Lock()
         self.last_request_time = 0
         # Initialize a client for testing connection
-        self.client = self._initialize_client(model, api_key)
+        self.client = self._initialize_client(provider, model, api_key)
         
-    def _initialize_client(self, model: str, api_key: Optional[str] = None):
-        """Initialize the appropriate LLM client based on the model."""
-        if "groq" in model.lower():
+    def _initialize_client(self, provider: str, model: str, api_key: Optional[str] = None):
+        """Initialize the appropriate LLM client based on the provider."""
+        if provider == "groq":
             final_api_key = api_key or os.getenv("GROQ_API_KEY")
             if not final_api_key:
                 raise ValueError(
@@ -174,11 +176,11 @@ class ResumeLLMParser:
                 )
             try:
                 groq_client = Groq(api_key=final_api_key)
-                return instructor.from_groq(groq_client, model="llama-3.3-70b-versatile")
+                return instructor.from_groq(groq_client, model=model)
             except Exception as e:
                 raise ValueError(f"❌ Failed to initialize Groq client: {e}\n💡 Check your API key is valid")
                 
-        elif "gpt" in model.lower():
+        elif provider == "openai":
             final_api_key = api_key or os.getenv("OPENAI_API_KEY")
             if not final_api_key:
                 raise ValueError(
@@ -187,11 +189,11 @@ class ResumeLLMParser:
                 )
             try:
                 openai_client = OpenAI(api_key=final_api_key)
-                return instructor.from_openai(openai_client)
+                return instructor.from_openai(openai_client, model=model)
             except Exception as e:
                 raise ValueError(f"❌ Failed to initialize OpenAI client: {e}\n💡 Check your API key is valid")
                 
-        elif "claude" in model.lower():
+        elif provider == "anthropic":
             final_api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
             if not final_api_key:
                 raise ValueError(
@@ -200,11 +202,11 @@ class ResumeLLMParser:
                 )
             try:
                 anthropic_client = anthropic.Anthropic(api_key=final_api_key)
-                return instructor.from_anthropic(anthropic_client, mode=instructor.Mode.ANTHROPIC_JSON)
+                return instructor.from_anthropic(anthropic_client, model=model, mode=instructor.Mode.ANTHROPIC_JSON)
             except Exception as e:
                 raise ValueError(f"❌ Failed to initialize Anthropic client: {e}\n💡 Check your API key is valid")
                 
-        elif "gemini" in model.lower():
+        elif provider == "gemini":
             final_api_key = api_key or os.getenv("GOOGLE_API_KEY")
             if not final_api_key:
                 raise ValueError(
@@ -213,12 +215,12 @@ class ResumeLLMParser:
                 )
             try:
                 genai.configure(api_key=final_api_key)
-                gemini_model = genai.GenerativeModel(model_name="models/gemini-2.0-flash-exp")
+                gemini_model = genai.GenerativeModel(model_name=model)
                 return instructor.from_gemini(client=gemini_model, mode=instructor.Mode.GEMINI_JSON)
             except Exception as e:
                 raise ValueError(f"❌ Failed to initialize Gemini client: {e}\n💡 Check your API key is valid")
         else:
-            raise ValueError(f"❌ Unsupported model: {model}\n💡 Supported models: groq-llama-3.3-70b, gpt-4, claude-3-haiku, gemini-2.0-flash")
+            raise ValueError(f"❌ Unsupported provider: {provider}\n💡 Supported providers: groq, openai, anthropic, gemini")
     
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         """Extract text from PDF file including hyperlinks."""
@@ -265,7 +267,7 @@ class ResumeLLMParser:
     
     def _get_client(self):
         """Get a fresh client instance for thread-safe usage."""
-        return self._initialize_client(self.model, self.api_key)
+        return self._initialize_client(self.provider, self.model, self.api_key)
     
     def _rate_limited_request(self, delay: float = 0.5):
         """Ensure minimum delay between requests to respect rate limits."""
@@ -791,9 +793,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python resume_extractor.py                          # Process all PDFs in current directory
+  python resume_extractor.py                          # Process all PDFs in current directory using Groq
   python resume_extractor.py --sample 5               # Test with 5 resumes
-  python resume_extractor.py --model gpt-4            # Use GPT-4 instead of Groq
+  python resume_extractor.py --provider openai --model gpt-4   # Use OpenAI GPT-4
+  python resume_extractor.py --provider anthropic --model claude-3-5-haiku-20241022  # Use Claude
   python resume_extractor.py --workers 8              # Use 8 parallel workers (faster)
   python resume_extractor.py --directory /path/to/resumes --output results.csv
 
@@ -804,9 +807,11 @@ Set API keys via environment variables:
   export GOOGLE_API_KEY="your_key_here"
         """
     )
-    parser.add_argument('--model', default='groq-llama-3.3-70b', 
-                       choices=['groq-llama-3.3-70b', 'gpt-4', 'claude-3-haiku', 'gemini-2.0-flash'],
-                       help='LLM model to use (default: groq-llama-3.3-70b)')
+    parser.add_argument('--provider', default='groq', 
+                       choices=['groq', 'openai', 'anthropic', 'gemini'],
+                       help='Model provider to use (default: groq)')
+    parser.add_argument('--model', default='llama-3.3-70b-versatile', 
+                       help='Model name to use. Works with any model supported by instructor for the chosen provider (default: llama-3.3-70b-versatile)')
     parser.add_argument('--api-key', help='API key for the model provider (or set via environment)')
     parser.add_argument('--output', default='candidates.csv', help='Output CSV filename (default: candidates.csv)')
     parser.add_argument('--sample', type=int, help='Process only N resumes for testing (default: all)')
@@ -815,7 +820,7 @@ Set API keys via environment variables:
     
     args = parser.parse_args()
     
-    print(f"🚀 Starting resume extraction with {args.model}")
+    print(f"🚀 Starting resume extraction with {args.provider}/{args.model}")
     print(f"📂 Searching directory: {args.directory}")
     print(f"📄 Output file: {args.output}")
     print(f"⚙️ Parallel workers: {args.workers}")
@@ -825,8 +830,8 @@ Set API keys via environment variables:
     
     try:
         # Initialize parser
-        resume_parser = ResumeLLMParser(model=args.model, api_key=args.api_key, max_workers=args.workers)
-        print(f"✅ Successfully initialized {args.model} client with {args.workers} workers")
+        resume_parser = ResumeLLMParser(provider=args.provider, model=args.model, api_key=args.api_key, max_workers=args.workers)
+        print(f"✅ Successfully initialized {args.provider}/{args.model} client with {args.workers} workers")
         
         # Process resumes
         resume_parser.process_all_resumes(

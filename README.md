@@ -80,10 +80,10 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
    # Test with a few resumes first (recommended)
    python resume_extractor.py --sample 5
    
-   # Use different AI models
-   python resume_extractor.py --model gpt-4               # OpenAI GPT-4
-   python resume_extractor.py --model claude-3-haiku      # Anthropic Claude
-   python resume_extractor.py --model gemini-2.0-flash    # Google Gemini
+   # Use different AI providers and models (works with any model supported by instructor)
+   python resume_extractor.py --provider openai --model gpt-4                        # OpenAI GPT-4
+   python resume_extractor.py --provider anthropic --model claude-3-5-haiku-20241022    # Anthropic Claude
+   python resume_extractor.py --provider gemini --model gemini-2.0-flash-exp         # Google Gemini
    
    # Analyze resumes in a specific folder
    python resume_extractor.py --directory resumes_batch_1
@@ -92,20 +92,23 @@ A comprehensive llm-based resume extractor and web-based dashboard for screening
    python resume_extractor.py --output applicants_2024.csv
    
    # Pass API key directly (alternative to environment variable)
-   python resume_extractor.py --model gpt-4 --api-key YOUR_API_KEY
+   python resume_extractor.py --provider openai --model gpt-4 --api-key YOUR_API_KEY
    
    # Use parallel processing for faster extraction (default: 4 workers)
    python resume_extractor.py --directory batch1 --workers 8
    
    # Combine options
-   python resume_extractor.py --directory batch1 --output batch1_results.csv --model groq-llama-3.3-70b --sample 50 --workers 6
+   python resume_extractor.py --directory batch1 --output batch1_results.csv --provider groq --model llama-3.3-70b-versatile --sample 50 --workers 6
    ```
    
-   **Supported AI Models:**
-   - `groq-llama-3.3-70b` (default - free tier available)
-   - `gpt-4` (requires OpenAI API key)
-   - `claude-3-haiku` (requires Anthropic API key)
-   - `gemini-2.0-flash` (requires Google API key)
+   **AI Provider Support:**
+   - **Providers:** `groq` (default), `openai`, `anthropic`, `gemini`
+   - **Models:** Works with **any model supported by the instructor library** for each provider
+   - **Tested combinations:** 
+     - `groq` + `llama-3.3-70b-versatile` (default - free tier)
+     - `openai` + `gpt-4`
+     - `anthropic` + `claude-3-5-haiku-20241022` 
+     - `gemini` + `gemini-2.0-flash-exp`
 
 3. **Start the dashboard server** (automatically generates resume paths):
    ```bash
@@ -210,7 +213,9 @@ python resume_extractor.py [OPTIONS]
 Options:
   --output FILE         Output CSV filename (default: candidates.csv)
   --directory DIR       Directory to search for resumes (default: current directory)
-  --model MODEL         LLM model to use (default: groq-llama-3.3-70b)
+  --provider PROVIDER   Model provider to use: groq, openai, anthropic, gemini (default: groq)
+  --model MODEL         Model name to use (default: llama-3.3-70b-versatile)
+                        Works with any model supported by instructor for the chosen provider
   --api-key KEY         API key for the model provider
   --sample N           Process only N resumes (for testing)
   --workers N          Number of parallel workers (default: 4, recommended: 4-8)
