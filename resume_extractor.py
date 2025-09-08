@@ -76,7 +76,7 @@ class ResumeData(BaseModel):
     
     # ==================== WORK EXPERIENCE ====================
     # Customize company tier definitions and job level categories
-    estimated_job_level: str = Field(description="Estimated job level (AMTS, MTS, SMTS, LMTS, PMTS based on experience and skills)")
+    estimated_job_level: str = Field(description="Estimated job level (Intern, L3/AMTS, L4/MTS, L5/SMTS, L6/LMTS, L7/PMTS, L8/Architect based on experience and skills)")
     programming_experience_years: float = Field(description="Total years of programming/software development experience in industry")
     companies_worked: str = Field(description="List of companies worked at, ordered by recency, comma-separated")
     company_tier: int = Field(description="Tier of most impressive work experience (1=FAANG/top tech, 2=unicorn/well-known, 3=established company, 4=startup, 5=unknown)")
@@ -303,11 +303,12 @@ Please extract and evaluate:
    - Location (country and city)
    - Estimated job level based on experience and skills:
      * Intern: Student or recent grad with no professional experience, internships only
-     * AMTS (Associate Member of Technical Staff): 0-2 years, entry level, recent grad
-     * MTS (Member of Technical Staff): 2-4 years, mid-level individual contributor
-     * SMTS (Senior Member of Technical Staff): 4-7 years, senior individual contributor
-     * LMTS (Lead Member of Technical Staff): 7-10 years, tech lead, some management
-     * PMTS (Principal Member of Technical Staff): 10+ years, principal engineer, architect
+     * L3/AMTS (Associate Member of Technical Staff): 0-2 years, entry level, recent grad
+     * L4/MTS (Member of Technical Staff): 2-4 years, mid-level individual contributor
+     * L5/SMTS (Senior Member of Technical Staff): 4-7 years, senior individual contributor
+     * L6/LMTS (Lead Member of Technical Staff): 7-10 years, tech lead, some management
+     * L7/PMTS (Principal Member of Technical Staff): 10+ years, principal engineer, architect
+     * L8/Architect: 12+ years, distinguished engineer, technical leadership
 
 2. Experience (use decimal years like 2.5 when appropriate):
    - Years of programming/software development experience in professional settings (not including education)
@@ -395,7 +396,7 @@ Please extract and evaluate:
 
 9. EXPERIENCE-RELATIVE AGGREGATE SCORES (1-10 scale, ALL RELATIVE TO JOB LEVEL):
    IMPORTANT: Score these relative to what would be exceptional for someone at their experience level.
-   An AMTS should be compared to other AMTS-level engineers, not to PMTS-level engineers.
+   An L3/AMTS should be compared to other L3/AMTS-level engineers, not to L7/PMTS-level engineers.
    
    - Academic Strength (1-10): Consider overall/CS world ranking, GPA, degrees, research FOR THEIR LEVEL
      * 10 = Top 5 world universities (MIT, Stanford, Harvard, etc.) with high GPA for their level
